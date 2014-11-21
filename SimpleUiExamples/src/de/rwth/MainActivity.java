@@ -10,6 +10,7 @@ import java.util.List;
 import tools.DragAndDropListener;
 import tools.ErrorHandler;
 import tools.IO;
+import tools.IntentHelper;
 import tools.SimpleAsyncTask;
 import v1.Headline;
 import v1.InfoText;
@@ -91,6 +92,20 @@ public class MainActivity extends Activity {
 		// throwExceptionForErrorHandlerTesting();
 
 		M_Container c = new M_Container();
+
+		final File fileToShare = new File(
+				Environment.getExternalStorageDirectory(), "img.jpg");
+		if (fileToShare.exists()) {
+			c.add(new M_Button("Share testimage img.jpg to Google+ ") {
+
+				@Override
+				public void onClick(Context context, Button arg1) {
+					Intent i = IntentHelper.newSendImageIntent(fileToShare, "",
+							"", "");
+					IntentHelper.launchGooglePlus(MainActivity.this, i);
+				}
+			});
+		}
 
 		c.add(new M_Button("Simple Start Example") {
 
