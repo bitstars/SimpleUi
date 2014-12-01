@@ -9,35 +9,48 @@ import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.widget.Button;
 
 public abstract class M_FilePickerButton extends M_Button implements
-		ActivityLifecycleListener {
+ActivityLifecycleListener {
 
 	private static final int SELECT_FILE_CODE = 213;
+	private File folderLocation;
 
-	public M_FilePickerButton(String buttonText) {
+	public M_FilePickerButton(final String buttonText) {
 		super(R.drawable.ic_input_add, buttonText);
 	}
 
+	public M_FilePickerButton(final String buttonText,
+			final File folderLocation) {
+		this(buttonText);
+		this.folderLocation = folderLocation;
+	}
+
 	@Override
-	public void onClick(Context context, Button clickedButton) {
-		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-		intent.setType("file/*");
+	public void onClick(final Context context, final Button clickedButton) {
+		final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 		KeepProcessAliveService.startKeepAliveService(context);
+		final String type = "file/*";
+		if (folderLocation != null) {// User specified a folder to start from
+			intent.setDataAndType(Uri.fromFile(folderLocation), type);
+		} else {
+			intent.setType(type);
+		}
 		((Activity) context).startActivityForResult(intent, SELECT_FILE_CODE);
 	}
 
 	@Override
-	public void onActivityResult(Activity a, int requestCode, int resultCode,
-			Intent data) {
+	public void onActivityResult(final Activity a, final int requestCode, final int resultCode,
+			final Intent data) {
 		if (requestCode == SELECT_FILE_CODE) {
 			KeepProcessAliveService.stopKeepAliveService();
 			if (resultCode == Activity.RESULT_OK) {
 
-				String filePath = M_MakePhoto
+				final String filePath = M_MakePhoto
 						.getPathFromImageFileSelectionIntent(a, data.getData());
-				File file = new File(filePath);
+				final File file = new File(filePath);
 				if (file.isFile()) {
 					onFilePathReceived(a, filePath, file, data);
 					return;
@@ -47,7 +60,7 @@ public abstract class M_FilePickerButton extends M_Button implements
 		}
 	}
 
-	public void onNoFileSuccessfullySelected(Activity a, Intent data) {
+	public void onNoFileSuccessfullySelected(final Activity a, final Intent data) {
 		// on default do nothing
 	}
 
@@ -67,20 +80,20 @@ public abstract class M_FilePickerButton extends M_Button implements
 			File file, Intent data);
 
 	@Override
-	public void onStop(Activity activity) {
+	public void onStop(final Activity activity) {
 	}
 
 	@Override
-	public boolean onCloseWindowRequest(Activity activity) {
+	public boolean onCloseWindowRequest(final Activity activity) {
 		return true;
 	}
 
 	@Override
-	public void onPause(Activity activity) {
+	public void onPause(final Activity activity) {
 	}
 
 	@Override
-	public void onResume(Activity activity) {
+	public void onResume(final Activity activity) {
 	}
 
 }
