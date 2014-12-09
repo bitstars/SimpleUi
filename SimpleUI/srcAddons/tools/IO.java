@@ -336,6 +336,11 @@ public class IO extends util.IOHelper {
 		private Editor e;
 		private int mode = Context.MODE_PRIVATE;
 
+		public Settings(Context target) {
+			context = target;
+			mySettingsName = "settings";
+		}
+
 		public Settings(Context target, String settingsFileName) {
 			context = target;
 			mySettingsName = settingsFileName;
@@ -378,28 +383,28 @@ public class IO extends util.IOHelper {
 					key, defaultValue);
 		}
 
-		public void storeString(String key, String value) {
+		public boolean storeString(String key, String value) {
 			if (e == null) {
 				e = context.getSharedPreferences(mySettingsName, mode).edit();
 			}
 			e.putString(key, value);
-			e.commit();
+			return e.commit();
 		}
 
-		public void storeBool(String key, boolean value) {
+		public boolean storeBool(String key, boolean value) {
 			if (e == null) {
 				e = context.getSharedPreferences(mySettingsName, mode).edit();
 			}
 			e.putBoolean(key, value);
-			e.commit();
+			return e.commit();
 		}
 
-		public void storeInt(String key, int value) {
+		public boolean storeInt(String key, int value) {
 			if (e == null) {
 				e = context.getSharedPreferences(mySettingsName, mode).edit();
 			}
 			e.putInt(key, value);
-			e.commit();
+			return e.commit();
 		}
 	}
 
@@ -496,18 +501,27 @@ public class IO extends util.IOHelper {
 	 * 
 	 * @param c
 	 * @param targetFolder
-	 *            e.g. {@link Environment#getExternalStorageDirectory()}. As a
-	 *            security feature this folder has to exist! use
-	 *            {@link File#mkdirs()}
+	 *            e.g. {@link Environment#getExternalStorageDirectory()}
 	 * @throws Exception
 	 */
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
-	public static boolean copyAssets(Context c, File targetFolder)
-			throws Exception {
+	public static boolean copyAssets(AssetManager assetManager,
+			File targetFolder) throws Exception {
 		Log.i(LOG_TAG, "Copying files from assets to folder " + targetFolder);
-		return copyAssets(c.getAssets(), "", targetFolder);
+		return copyAssets(assetManager, "", targetFolder);
 	}
 
+	/**
+	 * The files will be copied at the location targetFolder+path so if you
+	 * enter path="abc" and targetfolder="sdcard" the files will be located in
+	 * "sdcard/abc"
+	 * 
+	 * @param assetManager
+	 * @param path
+	 * @param targetFolder
+	 * @return
+	 * @throws Exception
+	 */
 	public static boolean copyAssets(AssetManager assetManager, String path,
 			File targetFolder) throws Exception {
 		Log.i(LOG_TAG, "Copying " + path + " to " + targetFolder);
@@ -517,7 +531,7 @@ public class IO extends util.IOHelper {
 		} else { // its a folder:
 			if (path.startsWith("images") || path.startsWith("sounds")
 					|| path.startsWith("webkit")) {
-				Log.i(LOG_TAG, "Skipping " + path);
+				Log.i(LOG_TAG, "  > Skipping " + path);
 				return false;
 			}
 			File targetDir = new File(targetFolder, path);
