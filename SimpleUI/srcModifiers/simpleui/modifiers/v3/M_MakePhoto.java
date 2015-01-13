@@ -26,10 +26,10 @@ import android.widget.LinearLayout;
 
 @TargetApi(5)
 public abstract class M_MakePhoto implements ModifierInterface,
-		ActivityLifecycleListener {
+ActivityLifecycleListener {
 
-	public final static int TAKE_PICTURE = 367289;
-	public static final int SELECT_FROM_FILE = 3463270;
+	public final static int TAKE_PICTURE = 5356;
+	public static final int SELECT_FROM_FILE = 24656;
 
 	private int maxWidth = 640;
 	private int maxHeight = 480;
@@ -55,28 +55,28 @@ public abstract class M_MakePhoto implements ModifierInterface,
 	public M_MakePhoto() {
 	}
 
-	public M_MakePhoto(Uri uri) {
+	public M_MakePhoto(final Uri uri) {
 		if (uri != null) {
 			setFileToLoadInImageView(IO.toFile(uri));
 		}
 	}
 
-	public M_MakePhoto(File f) {
+	public M_MakePhoto(final File f) {
 		setTakenBitmapFileAndUri(f);
 	}
 
-	private void setTakenBitmapFileAndUri(File takenBitmapFile) {
+	private void setTakenBitmapFileAndUri(final File takenBitmapFile) {
 		if (takenBitmapFile != null) {
 			takenBitmapUri = IO.toUri(takenBitmapFile);
 		}
 	}
 
-	public void setFileToLoadInImageView(File bitmap) {
+	public void setFileToLoadInImageView(final File bitmap) {
 		try {
 			setTakenBitmapFileAndUri(bitmap);
 			takenBitmap = IO.loadBitmapFromUri(takenBitmapUri);
 			refreshImageInImageView();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -95,8 +95,8 @@ public abstract class M_MakePhoto implements ModifierInterface,
 	 *            if true the selected image from the gallery will be rewritten
 	 *            to the SD card
 	 */
-	public M_MakePhoto(Bitmap startBitmap, int maxWidth, int maxHeight,
-			int jpgQuality, boolean restoreImageFromStorage) {
+	public M_MakePhoto(final Bitmap startBitmap, final int maxWidth, final int maxHeight,
+			final int jpgQuality, final boolean restoreImageFromStorage) {
 		this.takenBitmap = startBitmap;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -105,14 +105,14 @@ public abstract class M_MakePhoto implements ModifierInterface,
 	}
 
 	@Override
-	public View getView(Context context) {
+	public View getView(final Context context) {
 
-		LinearLayout box = new LinearLayout(context);
+		final LinearLayout box = new LinearLayout(context);
 		box.setOrientation(LinearLayout.VERTICAL);
 
-		String caption = getModifierCaption();
+		final String caption = getModifierCaption();
 		if (caption != null) {
-			M_Caption c = new M_Caption(caption);
+			final M_Caption c = new M_Caption(caption);
 			box.addView(c.getView(context));
 		}
 
@@ -127,38 +127,38 @@ public abstract class M_MakePhoto implements ModifierInterface,
 		if (takenBitmapUri != null && takenBitmap == null) {
 			try {
 				takenBitmap = IO.loadBitmapFromUri(takenBitmapUri);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
 		box.addView(imageViewModifier.getView(context));
 		refreshImageInImageView();
 
-		M_Button bTakePhoto = new M_Button(R.drawable.ic_menu_camera,
+		final M_Button bTakePhoto = new M_Button(R.drawable.ic_menu_camera,
 				getTextOnTakePhotoButton()) {
 
 			@Override
-			public void onClick(Context context, Button clickedButton) {
+			public void onClick(final Context context, final Button clickedButton) {
 				takePhoto((Activity) context);
 			}
 		};
 		box.addView(bTakePhoto.getView(context));
 
-		M_Button bSelectFromFile = new M_Button(R.drawable.ic_menu_gallery,
+		final M_Button bSelectFromFile = new M_Button(R.drawable.ic_menu_gallery,
 				getTextOnLoadFileButton()) {
 
 			@Override
-			public void onClick(Context context, Button clickedButton) {
+			public void onClick(final Context context, final Button clickedButton) {
 				selectPhotoFromFile((Activity) context);
 			}
 		};
 		box.addView(bSelectFromFile.getView(context));
 
-		M_Button deleteButton = new M_Button(R.drawable.ic_menu_delete,
+		final M_Button deleteButton = new M_Button(R.drawable.ic_menu_delete,
 				getTextOnDeleteButton()) {
 
 			@Override
-			public void onClick(Context context, Button clickedButton) {
+			public void onClick(final Context context, final Button clickedButton) {
 				if (onDeleteRequest((Activity) context)) {
 					removeImage();
 				}
@@ -187,7 +187,7 @@ public abstract class M_MakePhoto implements ModifierInterface,
 
 	public abstract String getTextOnTakePhotoButton();
 
-	public void takePhoto(Activity activity) {
+	public void takePhoto(final Activity activity) {
 
 		/*
 		 * TODO check if sd card available if yes then do it the current way if
@@ -201,9 +201,9 @@ public abstract class M_MakePhoto implements ModifierInterface,
 		 * data)
 		 */
 
-		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		final Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		imageFileName = getImageFileName();
-		File file = new File(Environment.getExternalStorageDirectory(),
+		final File file = new File(Environment.getExternalStorageDirectory(),
 				imageFileName);
 
 		try {
@@ -214,23 +214,23 @@ public abstract class M_MakePhoto implements ModifierInterface,
 			KeepProcessAliveService.startKeepAliveService(activity);
 			Log.d(LOG_TAG, "Starting image capture to store in file: " + file);
 			activity.startActivityForResult(i, TAKE_PICTURE);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			onImageCantBeStoredInStorage(e);
 		}
 
 	}
 
-	protected void selectPhotoFromFile(Activity context) {
+	protected void selectPhotoFromFile(final Activity context) {
 		// Intent intent = new Intent(Intent.ACTION_PICK,
 		// android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		Intent intent = new Intent();
+		final Intent intent = new Intent();
 		intent.setType("image/*");
 		intent.setAction(Intent.ACTION_GET_CONTENT);
 		KeepProcessAliveService.startKeepAliveService(context);
 		context.startActivityForResult(intent, M_MakePhoto.SELECT_FROM_FILE);
 	}
 
-	public void onImageCantBeStoredInStorage(IOException e) {
+	public void onImageCantBeStoredInStorage(final IOException e) {
 		e.printStackTrace();
 	}
 
@@ -261,17 +261,17 @@ public abstract class M_MakePhoto implements ModifierInterface,
 	public abstract boolean save(Activity activity, File takenBitmapFile);
 
 	@Override
-	public boolean onCloseWindowRequest(Activity a) {
+	public boolean onCloseWindowRequest(final Activity a) {
 		return true;
 	}
 
 	@Override
-	public void onStop(Activity activity) {
+	public void onStop(final Activity activity) {
 	}
 
 	@Override
-	public void onActivityResult(Activity a, int requestCode, int resultCode,
-			Intent data) {
+	public void onActivityResult(final Activity a, final int requestCode, final int resultCode,
+			final Intent data) {
 
 		Log.d(LOG_TAG, "onActivityResult");
 		Log.d(LOG_TAG, "resultCode=" + resultCode);
@@ -305,19 +305,19 @@ public abstract class M_MakePhoto implements ModifierInterface,
 	 * @param a
 	 * @param data
 	 */
-	private void loadBitmapFromFile(Activity a, Intent data) {
+	private void loadBitmapFromFile(final Activity a, final Intent data) {
 		if (data == null || data.getData() == null) {
 			Log.e(LOG_TAG, "Could not load image from intent " + data);
 			return;
 		}
 
-		Uri selectedImageUri = data.getData();
+		final Uri selectedImageUri = data.getData();
 
 		// MEDIA GALLERY
 		String filePath = null;
 		try {
 			filePath = getPathFromImageFileSelectionIntent(a, selectedImageUri);
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			e1.printStackTrace();
 		}
 
@@ -348,20 +348,20 @@ public abstract class M_MakePhoto implements ModifierInterface,
 			} else {
 				Log.e(LOG_TAG, "Could not load bitmap from file " + filePath);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			Log.e(LOG_TAG, "Error while loading bitmap from " + filePath);
 			e.printStackTrace();
 		}
 	}
 
-	public static String getPathFromImageFileSelectionIntent(Activity a, Uri uri) {
+	public static String getPathFromImageFileSelectionIntent(final Activity a, final Uri uri) {
 		Log.i(LOG_TAG, "Loading image from storage path uri: " + uri);
-		String[] projection = { MediaColumns.DATA };
-		Cursor cursor = a.managedQuery(uri, projection, null, null, null);
+		final String[] projection = { MediaColumns.DATA };
+		final Cursor cursor = a.managedQuery(uri, projection, null, null, null);
 		if (cursor != null) {
 			// HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
 			// THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
-			int columnIndex = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+			final int columnIndex = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
 			cursor.moveToFirst();
 			return cursor.getString(columnIndex);
 		} else {
@@ -370,28 +370,28 @@ public abstract class M_MakePhoto implements ModifierInterface,
 	}
 
 	@Deprecated
-	private String getFilePathFromGalleryIntent(Activity a, Uri uri) {
+	private String getFilePathFromGalleryIntent(final Activity a, final Uri uri) {
 		try {
-			String[] filePathColumn = { MediaColumns.DATA };
-			Cursor cursor = a.getContentResolver().query(uri, filePathColumn,
+			final String[] filePathColumn = { MediaColumns.DATA };
+			final Cursor cursor = a.getContentResolver().query(uri, filePathColumn,
 					null, null, null);
 			cursor.moveToFirst();
-			int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-			String filePath = cursor.getString(columnIndex);
+			final int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+			final String filePath = cursor.getString(columnIndex);
 			cursor.close();
 			return filePath;
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			e1.printStackTrace();
 		}
 		return null;
 	}
 
-	private void getBitmap(Activity a, Intent data) {
+	private void getBitmap(final Activity a, final Intent data) {
 		try {
 			setTakenBitmap((Bitmap) data.getExtras().get("data"));
 			Log.i(LOG_TAG,
 					"Got small image preview for backup, now trying to load real bitmap");
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			Log.i(LOG_TAG, "Could not load the small image preview "
 					+ "for backup (not possible on some devices).");
 		}
@@ -410,25 +410,25 @@ public abstract class M_MakePhoto implements ModifierInterface,
 			ImageTransform.tryToStoreBitmapToTargetFile(takenBitmap,
 					IO.toFile(takenBitmapUri), imageQuality);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void setTakenBitmap(Bitmap takenBitmap) {
+	private void setTakenBitmap(final Bitmap takenBitmap) {
 		this.takenBitmap = takenBitmap;
 	}
 
 	@Override
-	public void onPause(Activity activity) {
+	public void onPause(final Activity activity) {
 	}
 
 	@Override
-	public void onResume(Activity activity) {
+	public void onResume(final Activity activity) {
 	}
 
-	private static Bitmap rotateAndResizeReceivedImage(Context context,
-			Uri uri, int maxWidthInPixel, int maxHeightInPixel) {
+	private static Bitmap rotateAndResizeReceivedImage(final Context context,
+			final Uri uri, final int maxWidthInPixel, final int maxHeightInPixel) {
 		Log.d(LOG_TAG, "Loading bitmap object from uri: " + uri);
 		Bitmap b = ImageTransform.getBitmapFromUri(context, uri,
 				maxWidthInPixel, maxHeightInPixel);
