@@ -21,8 +21,14 @@ public abstract class M_FilePickerButton extends M_Button implements
 	}
 
 	private File folderLocation;
-	public M_FilePickerButton(final String buttonText,
-			final File folderLocation) {
+
+	/**
+	 * Allows to limit the picking process to a specific folder
+	 * 
+	 * @param buttonText
+	 * @param folderLocation
+	 */
+	public M_FilePickerButton(final String buttonText, final File folderLocation) {
 		this(buttonText);
 		this.folderLocation = folderLocation;
 	}
@@ -30,13 +36,13 @@ public abstract class M_FilePickerButton extends M_Button implements
 	@Override
 	public void onClick(Context context, Button clickedButton) {
 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-		KeepProcessAliveService.startKeepAliveService(context);
 		final String type = "file/*";
 		if (folderLocation != null) {// User specified a folder to start from
 			intent.setDataAndType(Uri.fromFile(folderLocation), type);
 		} else {
 			intent.setType(type);
 		}
+		KeepProcessAliveService.startKeepAliveService(context);
 		((Activity) context).startActivityForResult(intent, SELECT_FILE_CODE);
 	}
 

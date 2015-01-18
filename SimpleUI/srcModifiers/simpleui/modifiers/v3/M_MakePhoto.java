@@ -55,28 +55,28 @@ ActivityLifecycleListener {
 	public M_MakePhoto() {
 	}
 
-	public M_MakePhoto(final Uri uri) {
+	public M_MakePhoto(Uri uri) {
 		if (uri != null) {
 			setFileToLoadInImageView(IO.toFile(uri));
 		}
 	}
 
-	public M_MakePhoto(final File f) {
+	public M_MakePhoto(File f) {
 		setTakenBitmapFileAndUri(f);
 	}
 
-	private void setTakenBitmapFileAndUri(final File takenBitmapFile) {
+	private void setTakenBitmapFileAndUri(File takenBitmapFile) {
 		if (takenBitmapFile != null) {
 			takenBitmapUri = IO.toUri(takenBitmapFile);
 		}
 	}
 
-	public void setFileToLoadInImageView(final File bitmap) {
+	public void setFileToLoadInImageView(File bitmap) {
 		try {
 			setTakenBitmapFileAndUri(bitmap);
 			takenBitmap = IO.loadBitmapFromUri(takenBitmapUri);
 			refreshImageInImageView();
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -95,8 +95,8 @@ ActivityLifecycleListener {
 	 *            if true the selected image from the gallery will be rewritten
 	 *            to the SD card
 	 */
-	public M_MakePhoto(final Bitmap startBitmap, final int maxWidth, final int maxHeight,
-			final int jpgQuality, final boolean restoreImageFromStorage) {
+	public M_MakePhoto(Bitmap startBitmap, int maxWidth, int maxHeight,
+			int jpgQuality, boolean restoreImageFromStorage) {
 		this.takenBitmap = startBitmap;
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -105,14 +105,14 @@ ActivityLifecycleListener {
 	}
 
 	@Override
-	public View getView(final Context context) {
+	public View getView(Context context) {
 
-		final LinearLayout box = new LinearLayout(context);
+		LinearLayout box = new LinearLayout(context);
 		box.setOrientation(LinearLayout.VERTICAL);
 
-		final String caption = getModifierCaption();
+		String caption = getModifierCaption();
 		if (caption != null) {
-			final M_Caption c = new M_Caption(caption);
+			M_Caption c = new M_Caption(caption);
 			box.addView(c.getView(context));
 		}
 
@@ -127,38 +127,38 @@ ActivityLifecycleListener {
 		if (takenBitmapUri != null && takenBitmap == null) {
 			try {
 				takenBitmap = IO.loadBitmapFromUri(takenBitmapUri);
-			} catch (final Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		box.addView(imageViewModifier.getView(context));
 		refreshImageInImageView();
 
-		final M_Button bTakePhoto = new M_Button(R.drawable.ic_menu_camera,
+		M_Button bTakePhoto = new M_Button(R.drawable.ic_menu_camera,
 				getTextOnTakePhotoButton()) {
 
 			@Override
-			public void onClick(final Context context, final Button clickedButton) {
+			public void onClick(Context context, Button clickedButton) {
 				takePhoto((Activity) context);
 			}
 		};
 		box.addView(bTakePhoto.getView(context));
 
-		final M_Button bSelectFromFile = new M_Button(R.drawable.ic_menu_gallery,
+		M_Button bSelectFromFile = new M_Button(R.drawable.ic_menu_gallery,
 				getTextOnLoadFileButton()) {
 
 			@Override
-			public void onClick(final Context context, final Button clickedButton) {
+			public void onClick(Context context, Button clickedButton) {
 				selectPhotoFromFile((Activity) context);
 			}
 		};
 		box.addView(bSelectFromFile.getView(context));
 
-		final M_Button deleteButton = new M_Button(R.drawable.ic_menu_delete,
+		M_Button deleteButton = new M_Button(R.drawable.ic_menu_delete,
 				getTextOnDeleteButton()) {
 
 			@Override
-			public void onClick(final Context context, final Button clickedButton) {
+			public void onClick(Context context, Button clickedButton) {
 				if (onDeleteRequest((Activity) context)) {
 					removeImage();
 				}
@@ -187,7 +187,7 @@ ActivityLifecycleListener {
 
 	public abstract String getTextOnTakePhotoButton();
 
-	public void takePhoto(final Activity activity) {
+	public void takePhoto(Activity activity) {
 
 		/*
 		 * TODO check if sd card available if yes then do it the current way if
@@ -201,9 +201,9 @@ ActivityLifecycleListener {
 		 * data)
 		 */
 
-		final Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		imageFileName = getImageFileName();
-		final File file = new File(Environment.getExternalStorageDirectory(),
+		File file = new File(Environment.getExternalStorageDirectory(),
 				imageFileName);
 
 		try {
@@ -214,23 +214,23 @@ ActivityLifecycleListener {
 			KeepProcessAliveService.startKeepAliveService(activity);
 			Log.d(LOG_TAG, "Starting image capture to store in file: " + file);
 			activity.startActivityForResult(i, TAKE_PICTURE);
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			onImageCantBeStoredInStorage(e);
 		}
 
 	}
 
-	protected void selectPhotoFromFile(final Activity context) {
+	protected void selectPhotoFromFile(Activity context) {
 		// Intent intent = new Intent(Intent.ACTION_PICK,
 		// android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		final Intent intent = new Intent();
+		Intent intent = new Intent();
 		intent.setType("image/*");
 		intent.setAction(Intent.ACTION_GET_CONTENT);
 		KeepProcessAliveService.startKeepAliveService(context);
 		context.startActivityForResult(intent, M_MakePhoto.SELECT_FROM_FILE);
 	}
 
-	public void onImageCantBeStoredInStorage(final IOException e) {
+	public void onImageCantBeStoredInStorage(IOException e) {
 		e.printStackTrace();
 	}
 
@@ -261,17 +261,17 @@ ActivityLifecycleListener {
 	public abstract boolean save(Activity activity, File takenBitmapFile);
 
 	@Override
-	public boolean onCloseWindowRequest(final Activity a) {
+	public boolean onCloseWindowRequest(Activity a) {
 		return true;
 	}
 
 	@Override
-	public void onStop(final Activity activity) {
+	public void onStop(Activity activity) {
 	}
 
 	@Override
-	public void onActivityResult(final Activity a, final int requestCode, final int resultCode,
-			final Intent data) {
+	public void onActivityResult(Activity a, int requestCode, int resultCode,
+			Intent data) {
 
 		Log.d(LOG_TAG, "onActivityResult");
 		Log.d(LOG_TAG, "resultCode=" + resultCode);
@@ -305,19 +305,19 @@ ActivityLifecycleListener {
 	 * @param a
 	 * @param data
 	 */
-	private void loadBitmapFromFile(final Activity a, final Intent data) {
+	private void loadBitmapFromFile(Activity a, Intent data) {
 		if (data == null || data.getData() == null) {
 			Log.e(LOG_TAG, "Could not load image from intent " + data);
 			return;
 		}
 
-		final Uri selectedImageUri = data.getData();
+		Uri selectedImageUri = data.getData();
 
 		// MEDIA GALLERY
 		String filePath = null;
 		try {
 			filePath = getPathFromImageFileSelectionIntent(a, selectedImageUri);
-		} catch (final Exception e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 
@@ -348,20 +348,20 @@ ActivityLifecycleListener {
 			} else {
 				Log.e(LOG_TAG, "Could not load bitmap from file " + filePath);
 			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			Log.e(LOG_TAG, "Error while loading bitmap from " + filePath);
 			e.printStackTrace();
 		}
 	}
 
-	public static String getPathFromImageFileSelectionIntent(final Activity a, final Uri uri) {
+	public static String getPathFromImageFileSelectionIntent(Activity a, Uri uri) {
 		Log.i(LOG_TAG, "Loading image from storage path uri: " + uri);
-		final String[] projection = { MediaColumns.DATA };
-		final Cursor cursor = a.managedQuery(uri, projection, null, null, null);
+		String[] projection = { MediaColumns.DATA };
+		Cursor cursor = a.managedQuery(uri, projection, null, null, null);
 		if (cursor != null) {
 			// HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
 			// THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
-			final int columnIndex = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+			int columnIndex = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
 			cursor.moveToFirst();
 			return cursor.getString(columnIndex);
 		} else {
@@ -370,28 +370,28 @@ ActivityLifecycleListener {
 	}
 
 	@Deprecated
-	private String getFilePathFromGalleryIntent(final Activity a, final Uri uri) {
+	private String getFilePathFromGalleryIntent(Activity a, Uri uri) {
 		try {
-			final String[] filePathColumn = { MediaColumns.DATA };
-			final Cursor cursor = a.getContentResolver().query(uri, filePathColumn,
+			String[] filePathColumn = { MediaColumns.DATA };
+			Cursor cursor = a.getContentResolver().query(uri, filePathColumn,
 					null, null, null);
 			cursor.moveToFirst();
-			final int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-			final String filePath = cursor.getString(columnIndex);
+			int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+			String filePath = cursor.getString(columnIndex);
 			cursor.close();
 			return filePath;
-		} catch (final Exception e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		return null;
 	}
 
-	private void getBitmap(final Activity a, final Intent data) {
+	private void getBitmap(Activity a, Intent data) {
 		try {
 			setTakenBitmap((Bitmap) data.getExtras().get("data"));
 			Log.i(LOG_TAG,
 					"Got small image preview for backup, now trying to load real bitmap");
-		} catch (final Exception e1) {
+		} catch (Exception e1) {
 			Log.i(LOG_TAG, "Could not load the small image preview "
 					+ "for backup (not possible on some devices).");
 		}
@@ -410,25 +410,25 @@ ActivityLifecycleListener {
 			ImageTransform.tryToStoreBitmapToTargetFile(takenBitmap,
 					IO.toFile(takenBitmapUri), imageQuality);
 
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void setTakenBitmap(final Bitmap takenBitmap) {
+	private void setTakenBitmap(Bitmap takenBitmap) {
 		this.takenBitmap = takenBitmap;
 	}
 
 	@Override
-	public void onPause(final Activity activity) {
+	public void onPause(Activity activity) {
 	}
 
 	@Override
-	public void onResume(final Activity activity) {
+	public void onResume(Activity activity) {
 	}
 
-	private static Bitmap rotateAndResizeReceivedImage(final Context context,
-			final Uri uri, final int maxWidthInPixel, final int maxHeightInPixel) {
+	private static Bitmap rotateAndResizeReceivedImage(Context context,
+			Uri uri, int maxWidthInPixel, int maxHeightInPixel) {
 		Log.d(LOG_TAG, "Loading bitmap object from uri: " + uri);
 		Bitmap b = ImageTransform.getBitmapFromUri(context, uri,
 				maxWidthInPixel, maxHeightInPixel);
