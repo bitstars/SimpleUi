@@ -43,8 +43,8 @@ public class M_ModifierOverview extends M_Container {
 
 	public M_ModifierOverview() {
 		setCardBackgroundColor(Color.DKGRAY);
-		addM_ToolbarExample();
-		add(newM_CardViewAndM_InfoTextExamples());
+		addM_ToolbarExample(this);
+		add(newM_ContainerAndM_InfoTextExamples());
 		add(newM_ButtonExamples());
 		add(newM_HalfHalfExamples());
 		add(newM_ImageViewExample());
@@ -54,14 +54,15 @@ public class M_ModifierOverview extends M_Container {
 		add(newM_SpinnerExample());
 		add(newM_WebviewExample());
 		add(newM_Container2Example());
+		add(newM_ContainerInM_ContainerExample());
 	}
 
 	private static void showToast(Context c, String text) {
 		Toast.makeText(c, text, Toast.LENGTH_SHORT).show();
 	}
 
-	private void addM_ToolbarExample() {
-		add(new M_Toolbar("Modifier Overview"));
+	private static void addM_ToolbarExample(M_Container container) {
+		container.add(new M_Toolbar("Modifier Overview"));
 		MenuItemList menuItemList = new MenuItemList();
 		menuItemList.add(new MItem("I'm an M_Toolbar, click here", null) {
 			@Override
@@ -69,17 +70,17 @@ public class M_ModifierOverview extends M_Container {
 				showToast(context, "Item in M_Toolbar clicked");
 			}
 		});
-		setMenuItemList(menuItemList);
+		container.setMenuItemList(menuItemList);
 	}
 
-	private static M_Container newM_CardViewAndM_InfoTextExamples() {
+	private static M_Container newM_ContainerAndM_InfoTextExamples() {
 		M_Container c = new M_Container();
-		c.add(new M_Caption("This is a M_CardView"));
+		c.add(new M_Caption("This is a M_Container"));
 		c.add(M_SeperatorLine.newMaterialOne(null));
 		c.add(new M_InfoText("Modifiers will be grouped in separate "
 				+ "cards to give you a better overview."));
 		c.add(new M_InfoText(R.drawable.ic_dialog_info,
-				"A M_CardView can contain as many modifiers as you want."));
+				"A M_Container can contain as many modifiers as you want."));
 		c.add(new M_InfoText(
 				"This information is shown using M_InfoText modifiers. These modifiers display normal unmodifiable content."));
 
@@ -158,14 +159,12 @@ public class M_ModifierOverview extends M_Container {
 		c.add(M_SeperatorLine.newMaterialOne(null));
 
 		ModifierInterface left = new M_Button("SHARE", true) {
-
 			@Override
 			public void onClick(Context context, Button arg1) {
 				showToast(context, "SHARE clicked");
 			}
 		};
 		ModifierInterface right = new M_Button("EXPLORE", true) {
-
 			@Override
 			public void onClick(Context context, Button arg1) {
 				showToast(context, "EXPLORE clicked");
@@ -436,9 +435,21 @@ public class M_ModifierOverview extends M_Container {
 		card.add(c);
 		c.add(M_SeperatorLine.newMaterialOne(null));
 		for (int i = 0; i < 10; i++) {
-			c.add(new M_InfoText("Example text " + i));
+			c.add(new M_InfoText("Example M_InfoText nr. " + i));
 		}
 		return card;
+	}
+
+	private static M_Container newM_ContainerInM_ContainerExample() {
+		M_Container c1 = new M_Container();
+		c1.add(new M_Caption("M_Container inception"));
+		M_Container c2 = new M_Container();
+		c2.add(new M_InfoText(
+				"As you see, an M_Container in an M_Container is possible. "
+						+ "But keep in mind that with each layer the content will "
+						+ "have less space due to the padding"));
+		c1.add(c2);
+		return c1;
 	}
 
 }
