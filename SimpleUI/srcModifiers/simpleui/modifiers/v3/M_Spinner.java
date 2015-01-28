@@ -16,6 +16,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -25,7 +26,7 @@ import com.googlecode.simpleui.library.R;
 
 public abstract class M_Spinner implements ModifierInterface {
 
-	private static final String LOG_TAG = "M_Spinner";
+	private static final String LOG_TAG = M_Spinner.class.getSimpleName();
 	private static Handler myHandler = new Handler(Looper.getMainLooper());
 
 	public static class SpinnerItem {
@@ -115,13 +116,30 @@ public abstract class M_Spinner implements ModifierInterface {
 				return false;
 			}
 		});
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (id != selectedItemPos) {
+					onUserSelectedNewItem(id);
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 		spinner.setPrompt(getTitleForSpinnerBox());
 		setEditable(isEditable());
 		reloadItemsInSpinner(context);
-
 		container.addView(spinner);
-
 		return container;
+	}
+
+	protected void onUserSelectedNewItem(long selectedItemId) {
+		Log.i(LOG_TAG, "onUserSelectedNewItem(selectedItemId=" + selectedItemId
+				+ ")");
 	}
 
 	public void reloadItemsInSpinner(final Context context) {
@@ -145,6 +163,7 @@ public abstract class M_Spinner implements ModifierInterface {
 		a.setDropDownViewResource(android.R.layout.select_dialog_singlechoice);
 		int oldPos = spinner.getSelectedItemPosition();
 		if (oldPos != AdapterView.INVALID_POSITION) {
+			onSelect(oldPos);
 			selectedItemPos = oldPos;
 		}
 		spinner.setAdapter(a);
@@ -242,5 +261,9 @@ public abstract class M_Spinner implements ModifierInterface {
 			}
 		});
 		return true;
+	}
+
+	protected void onSelect(final int posInList) {
+		Log.d(LOG_TAG, "Selected " + posInList);
 	}
 }
