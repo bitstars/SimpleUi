@@ -263,7 +263,4 @@ public abstract class M_Spinner implements ModifierInterface {
 		return true;
 	}
 
-	protected void onSelect(final int posInList) {
-		Log.d(LOG_TAG, "Selected " + posInList);
-	}
 }
