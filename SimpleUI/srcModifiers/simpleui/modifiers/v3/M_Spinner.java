@@ -145,6 +145,7 @@ public abstract class M_Spinner implements ModifierInterface {
 		a.setDropDownViewResource(android.R.layout.select_dialog_singlechoice);
 		int oldPos = spinner.getSelectedItemPosition();
 		if (oldPos != AdapterView.INVALID_POSITION) {
+			onSelect(oldPos);
 			selectedItemPos = oldPos;
 		}
 		spinner.setAdapter(a);
@@ -242,5 +243,9 @@ public abstract class M_Spinner implements ModifierInterface {
 			}
 		});
 		return true;
+	}
+
+	protected void onSelect(final int posInList) {
+		Log.d(LOG_TAG, "Selected " + posInList);
 	}
 }

@@ -102,10 +102,12 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onClick(Context context, Button b) {
-						startActivity(new Intent(MainActivity.this,
-								ExampleActivity1.class));
-					}
-				});
+				startActivity(new Intent(MainActivity.this,
+						ExampleActivity1.class));
+			}
+		});
+		addButtonToStartModifier(innerContainer, "StartValueModifier",
+				new M_KeyValueModifierTests());
 	}
 
 	private void addButtonToStartModifier(M_Container targetContainer,
