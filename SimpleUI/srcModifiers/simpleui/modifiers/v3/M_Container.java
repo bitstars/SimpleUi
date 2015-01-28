@@ -45,6 +45,18 @@ public class M_Container extends M_Collection implements OptionsMenuListener {
 	private CardView card;
 	private LinearLayout mostOuterBox;
 
+	public M_Container() {
+		super();
+	}
+
+	/**
+	 * {@link #add}{@code (m)} directly.
+	 */
+	public M_Container(final ModifierInterface m) {
+		this();
+		this.add(m);
+	}
+
 	@Override
 	public View getView(Context c) {
 		this.context = c;
@@ -58,6 +70,9 @@ public class M_Container extends M_Collection implements OptionsMenuListener {
 	}
 
 	public void rebuildUi() {
+		if (mostOuterBox == null) {
+			return; // Prevent NPE
+		}
 		if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
 			mostOuterBox.removeAllViews();
 			createCardWithContent();

@@ -222,6 +222,7 @@ public abstract class M_Spinner implements ModifierInterface {
 	}
 
 	public boolean selectInSpinner(final int posInList) {
+		onSelect(posInList);
 		if (spinner == null || spinnerItemsList == null
 				|| spinnerItemsList.isEmpty()) {
 			Log.e(LOG_TAG, "spinner or spinnerItemsList was null or "
@@ -242,5 +243,9 @@ public abstract class M_Spinner implements ModifierInterface {
 			}
 		});
 		return true;
+	}
+
+	protected void onSelect(final int posInList) {
+		Log.d(LOG_TAG, "Selected " + posInList);
 	}
 }
