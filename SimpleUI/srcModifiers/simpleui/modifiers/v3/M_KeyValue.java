@@ -29,28 +29,28 @@ public abstract class M_KeyValue extends M_Container {
 		this.key = defaultKey;
 		this.value = getValueForKey(key);
 
-		final M_Container startValueModifier = new M_Container(
+		final M_Container startValueModifier = new M_Container();
+		startValueModifier.add(new M_FloatModifier() {
 
-				new M_FloatModifier() {
+			@Override
+			public String getVarName() {
+				return "Start Value for " + key;
+			}
 
-					@Override
-					public String getVarName() {
-						return "Start Value for " + key;
-					}
+			@Override
+			public boolean saveFloat(final float value) {
+				M_KeyValue.this.value = value;
+				return true;
+			}
 
-					@Override
-					public boolean saveFloat(final float value) {
-						M_KeyValue.this.value = value;
-						return true;
-					}
+			@Override
+			public float loadFloat() {
+				return getValueForKey(key);
+			}
+		});
 
-					@Override
-					public float loadFloat() {
-						return getValueForKey(key);
-					}
-				});
-
-		final M_Container keySelector = new M_Container(new M_Spinner() {
+		final M_Container keySelector = new M_Container();
+		keySelector.add(new M_Spinner() {
 
 			@Override
 			public boolean save(final SpinnerItem arg0) {
@@ -92,6 +92,7 @@ public abstract class M_KeyValue extends M_Container {
 			}
 
 		});
+		keySelector.setFillCompleteScreen(false);
 
 		final M_Button addButton = new M_Button("Add") {
 			@Override
@@ -130,7 +131,8 @@ public abstract class M_KeyValue extends M_Container {
 						return "New identifier";
 					}
 				};
-				final M_Container m = new M_Container(newIdentifierModifier);
+				final M_Container m = new M_Container();
+				m.add(newIdentifierModifier);
 				SimpleUI.showCancelOkDialog(arg0, "Cancel", "Ok", m);
 			}
 		};
