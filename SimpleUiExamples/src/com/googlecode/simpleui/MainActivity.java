@@ -7,6 +7,7 @@ import simpleui.examples.M_ExampleDemoUiV1;
 import simpleui.examples.M_ModifierOverview;
 import simpleui.examples.activities.ExampleActivity1;
 import simpleui.examples.listwrapper.M_ListWrapperV3Tests;
+import simpleui.examples.modifiers.M_KeyValueModifierTests;
 import simpleui.modifiers.ModifierInterface;
 import simpleui.modifiers.v3.M_Button;
 import simpleui.modifiers.v3.M_Caption;
@@ -102,10 +103,12 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onClick(Context context, Button b) {
-						startActivity(new Intent(MainActivity.this,
-								ExampleActivity1.class));
-					}
-				});
+				startActivity(new Intent(MainActivity.this,
+						ExampleActivity1.class));
+			}
+		});
+		addButtonToStartModifier(innerContainer, "StartValueModifier",
+				new M_KeyValueModifierTests());
 	}
 
 	private void addButtonToStartModifier(M_Container targetContainer,

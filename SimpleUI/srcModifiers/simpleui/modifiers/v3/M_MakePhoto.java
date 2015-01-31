@@ -29,10 +29,10 @@ import com.ipaulpro.afilechooser.utils.FileUtils;
 
 @TargetApi(5)
 public abstract class M_MakePhoto implements ModifierInterface,
-		ActivityLifecycleListener {
+ActivityLifecycleListener {
 
-	public final static int TAKE_PICTURE = 3672;
-	public static final int SELECT_FROM_FILE = 3463;
+	public final static int TAKE_PICTURE = 5356;
+	public static final int SELECT_FROM_FILE = 24656;
 
 	private int maxWidth = 640;
 	private int maxHeight = 480;

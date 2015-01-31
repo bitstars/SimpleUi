@@ -45,6 +45,10 @@ public class M_Container extends M_Collection implements OptionsMenuListener {
 	private CardView card;
 	private LinearLayout mostOuterBox;
 
+	public M_Container() {
+		super();
+	}
+
 	@Override
 	public View getView(Context c) {
 		this.context = c;

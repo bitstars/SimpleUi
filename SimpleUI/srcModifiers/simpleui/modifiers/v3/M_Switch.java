@@ -10,12 +10,12 @@ public abstract class M_Switch implements ModifierInterface {
 	private SwitchCompat s;
 	private final String varName;
 
-	public M_Switch(String varName) {
+	public M_Switch(final String varName) {
 		this.varName = varName;
 	}
 
 	@Override
-	public View getView(Context context) {
+	public View getView(final Context context) {
 		s = new SwitchCompat(context);
 		s.setText(varName);
 		s.setChecked(loadVar());
@@ -33,4 +33,13 @@ public abstract class M_Switch implements ModifierInterface {
 
 	public abstract boolean save(boolean checked);
 
+	/**
+	 * @return The boolean value of the switch.
+	 */
+	public final boolean isChecked() {
+		if (s == null) {
+			return loadVar();
+		}
+		return s.isChecked();
+	}
 }
