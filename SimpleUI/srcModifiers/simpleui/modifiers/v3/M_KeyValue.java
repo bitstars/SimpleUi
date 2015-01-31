@@ -11,19 +11,26 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public abstract class M_KeyValue extends M_Container {
+	// ================================================================================
+	// Properties
+	// ================================================================================
 
 	private static final String LOG_TAG = M_KeyValue.class
 			.getSimpleName();
 	private String key;
 	private float value;
 
+	// ================================================================================
+	// Constructors
+	// ================================================================================
+
 	public M_KeyValue(@NonNull String defaultKey) {
 
-		if (defaultKey == null) {
-			throw new RuntimeException("getKey() return value may not be null.");
+		if (defaultKey == null || defaultKey.equals("")) {
+			throw new IllegalArgumentException("Argument may not be null.");
 		} else if (getListOfKeys().isEmpty()
 				|| !getListOfKeys().contains(defaultKey)) {
-			// Add def. key to list
+			// Add default key to list
 			setValueAndKey(defaultKey, getDefaultValue(defaultKey));
 		}
 		this.key = defaultKey;
@@ -31,10 +38,9 @@ public abstract class M_KeyValue extends M_Container {
 
 		final M_Container startValueModifier = new M_Container();
 		startValueModifier.add(new M_FloatModifier() {
-
 			@Override
 			public String getVarName() {
-				return "Start Value for " + key;
+				return M_KeyValue.this.getValueIdentifier();// + " for " + key;
 			}
 
 			@Override
@@ -51,7 +57,6 @@ public abstract class M_KeyValue extends M_Container {
 
 		final M_Container keySelector = new M_Container();
 		keySelector.add(new M_Spinner() {
-
 			@Override
 			public boolean save(final SpinnerItem arg0) {
 				return true;
@@ -79,14 +84,23 @@ public abstract class M_KeyValue extends M_Container {
 
 			@Override
 			public String getVarName() {
-				return "Value Identifier";
+				return getIdentifierTypeDescription();
 			}
 
 			@Override
 			protected void onUserSelectedNewItem(Context context,
 					long selectedItemId, SpinnerItem selectedItem) {
+				/**
+				 * Save current selection
+				 */
+				startValueModifier.save(); // Update M_KeyValue.this.key
+				M_KeyValue.this.save();
+
+				/**
+				 * Rebuild UI
+				 */
 				super.onUserSelectedNewItem(context, selectedItemId,
-						selectedItem); // Just log
+						selectedItem); // Just log to console
 				key = getListOfKeys().get((int) selectedItemId);
 				startValueModifier.rebuildUi();
 			}
@@ -94,7 +108,7 @@ public abstract class M_KeyValue extends M_Container {
 		});
 		keySelector.setFillCompleteScreen(false);
 
-		final M_Button addButton = new M_Button("Add") {
+		final M_Button addButton = new M_Button("+") {
 			@Override
 			public void onClick(final Context arg0, final Button arg1) {
 				final M_TextModifier newIdentifierModifier = new M_TextModifier() {
@@ -104,10 +118,11 @@ public abstract class M_KeyValue extends M_Container {
 
 					@Override
 					public boolean save(final String key) {
+						M_KeyValue.this.save();
 						if (key == null || key.equals("")) {
 							Toast.makeText(getContext(), "invalid key",
 									Toast.LENGTH_SHORT).show();
-							return false;
+							return false; // Prevent closing UI
 						} else if (getListOfKeys().contains(key)) {
 							Toast.makeText(getContext(),
 									key + " already exists.",
@@ -144,18 +159,20 @@ public abstract class M_KeyValue extends M_Container {
 		add(startValueModifier);
 	}
 
-	/**
-	 * @param key
-	 * @return The default value (used when a key is added).
-	 */
-	protected abstract float getDefaultValue(String key);
+	// ================================================================================
+	// Superclass
+	// ================================================================================
 
 	@Override
 	public boolean save() {
-		super.save();
+		super.save(); // Updates key, value
 		setValueAndKey(key, value);
 		return true;
 	}
+
+	// ================================================================================
+	// Abstract methods
+	// ================================================================================
 
 	/**
 	 * @return The list of keys to be modified. If you want to edit a Map, use
@@ -163,12 +180,35 @@ public abstract class M_KeyValue extends M_Container {
 	 */
 	protected abstract List<String> getListOfKeys();
 
-	protected abstract void setValueAndKey(String key, float value);
-
 	protected abstract float getValueForKey(String key);
 
+	protected abstract void setValueAndKey(String key, float value);
+
 	/**
+	 * This implementation returns {@code 0}.
+	 * 
+	 * @param key
+	 * @return The default value (used when a key is added).
+	 */
+	protected float getDefaultValue(String key) {
+		return 0;
+	};
+
+	/**
+	 * This implementation returns {@code "Value"}.
+	 * 
 	 * @return The name of your value (e.g. "Start value", "Default Value")
 	 */
-	protected abstract String getValueIdentifier();
+	protected String getValueIdentifier() {
+		return "Value";
+	}
+
+	/**
+	 * This implementation returns {@code "ID"}.
+	 * 
+	 * @return The text supposed to be shown next to the List of Identifiers.
+	 */
+	protected String getIdentifierTypeDescription() {
+		return "ID";
+	}
 }
