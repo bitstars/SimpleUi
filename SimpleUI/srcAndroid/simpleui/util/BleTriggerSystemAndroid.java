@@ -10,17 +10,23 @@ import android.bluetooth.BluetoothDevice;
  */
 public class BleTriggerSystemAndroid implements BleTriggerSystem {
 
+	private static final String LOG_TAG = "BleTriggerSystemAndroid";
 	private final BleTriggerOnDistance trigger;
 	private String lastFoundBleDeviceId;
+	private String lastFoundBleDeviceIdUuid;
 	protected float lastFoundBleDistance = Float.MAX_VALUE;
 	private Command commandToTriggerOnNextRefresh;
+	private Command commandLastTriggered;
 
 	public BleTriggerSystemAndroid(int updateSpeedInMs) {
 		trigger = new BleTriggerOnDistance(updateSpeedInMs) {
 			@Override
 			protected void onScanReset() {
 				if (commandToTriggerOnNextRefresh != null) {
-					commandToTriggerOnNextRefresh.execute();
+					if (commandToTriggerOnNextRefresh != commandLastTriggered) {
+						commandToTriggerOnNextRefresh.execute();
+						commandLastTriggered = commandToTriggerOnNextRefresh;
+					}
 					commandToTriggerOnNextRefresh = null;
 					lastFoundBleDistance = Float.MAX_VALUE;
 				}
@@ -29,22 +35,33 @@ public class BleTriggerSystemAndroid implements BleTriggerSystem {
 	}
 
 	@Override
-	public void addCommand(String bleDeviceId, float maxRangeInPercent,
+	public void addCommand(final String bleDeviceId, float maxRangeInPercent,
 			final Command command) {
+		Log.d(LOG_TAG, "added command");
 		trigger.addBleDeviceFoundListener(bleDeviceId,
 				new BleDeviceInRangeListener(maxRangeInPercent) {
 
 					@Override
 					public boolean onDeviceInRange(String deviceId,
 							Integer deviceRssi, BluetoothDevice device,
-							long totalTimeRunningInMs,
+							String uuid, long totalTimeRunningInMs,
 							float currentRangeInPercent) {
-						if (!deviceId.equals(lastFoundBleDeviceId)
-								&& currentRangeInPercent < lastFoundBleDistance) {
-							lastFoundBleDeviceId = deviceId;
+						Log.d(LOG_TAG, "uuid found: " + uuid);
+						if (currentRangeInPercent < lastFoundBleDistance) {
+							if (bleDeviceId.contains(":")) {
+								if (!deviceId.equals(lastFoundBleDeviceId)) {
+									lastFoundBleDeviceId = deviceId;
+								}
+							} else {
+								if (!deviceId.equals(lastFoundBleDeviceIdUuid)) {
+									lastFoundBleDeviceIdUuid = deviceId;
+								}
+							}
 							lastFoundBleDistance = currentRangeInPercent;
 							commandToTriggerOnNextRefresh = command;
+
 						}
+
 						return true;
 					}
 				});
@@ -63,6 +80,12 @@ public class BleTriggerSystemAndroid implements BleTriggerSystem {
 	@Override
 	public void stopWatching() {
 		trigger.stopWatching();
+	}
+
+	@Override
+	public void resetCooldowns() {
+		commandLastTriggered = null;
+
 	}
 
 }

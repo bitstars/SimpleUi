@@ -12,7 +12,7 @@ import android.bluetooth.BluetoothDevice;
  * value range which is in the bottom 20% of the total possible value range then
  * trigger the event. So if you pass 20% for the trigger it will trigger on
  * close proximity, if you pass 100% it will trigger every time
- *
+ * 
  */
 public class BleTriggerOnDistance extends
 		BleTrigger<BleTriggerOnDistance.BleDeviceInRangeListener> {
@@ -38,7 +38,7 @@ public class BleTriggerOnDistance extends
 
 		@Override
 		public boolean onDeviceFound(String deviceId, Integer deviceRssi,
-				BluetoothDevice device, long totalTimeRunningInMs) {
+				BluetoothDevice device, String uuid, long totalTimeRunningInMs) {
 			if (deviceRssi != null) {
 				deviceRssi = Math.abs(deviceRssi);
 				if (deviceRssi < minRssi) {
@@ -50,22 +50,22 @@ public class BleTriggerOnDistance extends
 				float currentPercent = (deviceRssi - minRssi)
 						/ (maxRssi - minRssi) * 100;
 				if (currentPercent <= maxRangeInPercent) {
-					return onDeviceInRange(deviceId, deviceRssi, device,
+					return onDeviceInRange(deviceId, deviceRssi, device, uuid,
 							totalTimeRunningInMs, currentPercent);
 				} else {
 					return onDeviceFoundButNotInRange(deviceId, deviceRssi,
-							device, totalTimeRunningInMs, currentPercent);
+							device, uuid, totalTimeRunningInMs, currentPercent);
 				}
 			}
 			return true;
 		}
 
 		public abstract boolean onDeviceInRange(String deviceId,
-				Integer deviceRssi, BluetoothDevice device,
+				Integer deviceRssi, BluetoothDevice device, String uuid,
 				long totalTimeRunningInMs, float currentRangeInPercent);
 
 		protected boolean onDeviceFoundButNotInRange(String deviceId,
-				Integer deviceRssi, BluetoothDevice device,
+				Integer deviceRssi, BluetoothDevice device, String uiid,
 				long totalTimeRunningInMs, float currentRangeInPercent) {
 			return true;
 		}

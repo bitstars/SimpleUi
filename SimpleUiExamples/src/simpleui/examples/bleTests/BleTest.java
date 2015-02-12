@@ -17,10 +17,12 @@ public class BleTest {
 		ble.addBleDeviceFoundListener(new BleDeviceFoundListener() {
 			@Override
 			public boolean onDeviceFound(String deviceId, Integer deviceRssi,
-					BluetoothDevice device, long totalTimeRunningInMs) {
+					BluetoothDevice device, String uuid,
+					long totalTimeRunningInMs) {
 				Log.i("totalTimeRunningInMs=" + totalTimeRunningInMs);
 				Log.i("device.getName()=" + device.getName());
 				Log.i("deviceId=" + deviceId);
+				Log.i("Uuid=" + uuid);
 				Log.i("deviceRssi=" + deviceRssi);
 				boolean keepRunning = totalTimeRunningInMs < 60 * 1000;
 				return keepRunning; // stop after one minute
@@ -37,14 +39,15 @@ public class BleTest {
 			@SuppressLint("NewApi")
 			@Override
 			public boolean onDeviceInRange(String deviceId, Integer deviceRssi,
-					BluetoothDevice device, long totalTimeRunningInMs,
-					float currentRangeInPercent) {
+					BluetoothDevice device, String uuid,
+					long totalTimeRunningInMs, float currentRangeInPercent) {
 
 				Log.i("totalTimeRunningInMs=" + totalTimeRunningInMs);
 				Log.i("device.getName()=" + device.getName());
 				Log.i("deviceId=" + deviceId);
 				Log.i("deviceRssi=" + deviceRssi);
 				Log.i("currentDistancePercent=" + currentRangeInPercent);
+				Log.i("Uuid=" + uuid);
 
 				boolean keepRunning = totalTimeRunningInMs < 60 * 1000;
 				return keepRunning; // stop after one minute
@@ -52,7 +55,7 @@ public class BleTest {
 
 			@Override
 			protected boolean onDeviceFoundButNotInRange(String deviceId,
-					Integer deviceRssi, BluetoothDevice device,
+					Integer deviceRssi, BluetoothDevice device, String uuid,
 					long totalTimeRunningInMs, float currentRangeInPercent) {
 				Log.w("currentDistancePercent=" + currentRangeInPercent);
 				boolean keepRunning = totalTimeRunningInMs < 60 * 1000;

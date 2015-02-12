@@ -12,6 +12,8 @@ public interface BleTriggerSystem {
 
 	void stopWatching();
 
+	void resetCooldowns();
+
 	boolean isWatching();
 
 }

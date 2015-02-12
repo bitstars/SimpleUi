@@ -39,7 +39,7 @@ public class BleTrigger<T extends BleTrigger.BleDeviceFoundListener> {
 		 *         be stopped
 		 */
 		boolean onDeviceFound(String deviceId, Integer deviceRssi,
-				BluetoothDevice device, long totalTimeRunningInMs);
+				BluetoothDevice device, String uuid, long totalTimeRunningInMs);
 
 	}
 
@@ -91,7 +91,8 @@ public class BleTrigger<T extends BleTrigger.BleDeviceFoundListener> {
 						@Override
 						public void onLeScan(BluetoothDevice device, int rssi,
 								byte[] scanRecord) {
-							processScanResult(device, rssi);
+							String uuid = extractUuid(scanRecord);
+							processScanResult(device, rssi, uuid);
 						}
 
 					};
@@ -117,20 +118,21 @@ public class BleTrigger<T extends BleTrigger.BleDeviceFoundListener> {
 	 * @param device
 	 * @param rssi
 	 */
-	protected void processScanResult(BluetoothDevice device, int rssi) {
+	protected void processScanResult(BluetoothDevice device, int rssi,
+			String uuid) {
 		String deviceId = device.getAddress();
 
 		long totalTimeRunning = System.currentTimeMillis() - startTime;
 		boolean keepRunning = true;
-		T l = listeners.get(deviceId);
+		T l = listeners.get(uuid);
 		if (l != null) {
 			keepRunning = l.onDeviceFound(deviceId, rssi != 0 ? rssi : null,
-					device, totalTimeRunning);
+					device, uuid, totalTimeRunning);
 		}
 		T anyDeviceListener = listeners.get(DEVICE_ID_ANY_DEVICE);
 		if (anyDeviceListener != null) {
 			keepRunning = anyDeviceListener.onDeviceFound(deviceId, rssi,
-					device, totalTimeRunning);
+					device, uuid, totalTimeRunning);
 		}
 		if (!keepRunning) {
 			stopWatching();
@@ -209,6 +211,73 @@ public class BleTrigger<T extends BleTrigger.BleDeviceFoundListener> {
 			deviceId = DEVICE_ID_ANY_DEVICE;
 		}
 		return listeners.put(deviceId, bleDeviceFoundListener);
+	}
+
+	/**
+	 * Extract UUID from byte[] scanRecord by Ted http://kittensandcode
+	 * .blogspot.co.uk/2014/08/ibeacons- and-android-parsing-uuid-major.html
+	 * 
+	 * @param scanRecord
+	 * @return String uuid
+	 */
+	private static String extractUuid(byte[] scanRecord) {
+		int startByte = 2;
+		boolean patternFound = false;
+		while (startByte <= 5) {
+			if ((scanRecord[startByte + 2] & 0xff) == 0x02
+					&& (scanRecord[startByte + 3] & 0xff) == 0x15) {
+
+				patternFound = true;
+				break;
+			}
+			startByte++;
+		}
+
+		if (patternFound) {
+			// Convert to hex String
+			byte[] uuidBytes = new byte[16];
+			System.arraycopy(scanRecord, startByte + 4, uuidBytes, 0, 16);
+			String hexString = bytesToHex(uuidBytes);
+
+			// UUID
+			String uuid = hexString.substring(0, 8) + "-"
+					+ hexString.substring(8, 12) + "-"
+					+ hexString.substring(12, 16) + "-"
+					+ hexString.substring(16, 20) + "-"
+					+ hexString.substring(20, 32);
+
+			// // Major value
+			// int major = (scanRecord[startByte + 20] &
+			// 0xff)
+			// * 0x100
+			// + (scanRecord[startByte + 21] & 0xff);
+			//
+			// // Minor value
+			// int minor = (scanRecord[startByte + 22] &
+			// 0xff)
+			// * 0x100
+			// + (scanRecord[startByte + 23] & 0xff);
+
+			return uuid;
+		} else {
+			return "unknown";
+		}
+	}
+
+	/**
+	 * bytesToHex method Found on the internet
+	 * http://stackoverflow.com/a/9855338
+	 */
+	static final char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+	private static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		for (int j = 0; j < bytes.length; j++) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
 	}
 
 }
