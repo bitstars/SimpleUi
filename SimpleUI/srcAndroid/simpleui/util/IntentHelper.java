@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.provider.AlarmClock;
@@ -278,6 +279,27 @@ public class IntentHelper {
 			}
 		}
 		context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+	}
+
+	/**
+	 * Method to check whether an applicaton / package is installed or not found
+	 * on stackoverflow:
+	 * http://stackoverflow.com/questions/18752202/check-if-application
+	 * -is-installed-android
+	 * 
+	 * @param context
+	 * @param packageName
+	 *            Name of package to check for existence
+	 * @return boolean
+	 */
+	public static boolean checkAppInstalled(Context context, String packageName) {
+		PackageManager pm = context.getPackageManager();
+		try {
+			pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+			return true;
+		} catch (NameNotFoundException e) {
+			return false;
+		}
 	}
 
 }
