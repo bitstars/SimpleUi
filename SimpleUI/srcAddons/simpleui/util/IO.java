@@ -518,8 +518,13 @@ public class IO extends simpleui.util.IOHelper {
 		 *            the timestamp when the file was last changed, can be 0 if
 		 *            not available
 		 * @return true to continue the process, false to abort it
+		 * @param fileSizeOnServer
+		 *            file size in bytes on server, check additionally to the
+		 *            lastModifiedTimestamp, can be null if unknown
+		 * @return
 		 */
-		boolean onStart(String fileName, long lastModifiedTimestamp);
+		boolean onStart(String fileName, long lastModifiedTimestamp,
+				Integer fileSizeOnServer);
 
 		void onStop(File downloadedFile);
 
@@ -583,18 +588,32 @@ public class IO extends simpleui.util.IOHelper {
 			// might be -1: server did not report the length
 			int fileLength = connection.getContentLength();
 
-			String raw = connection.getHeaderField("Content-Disposition");
-			// raw = "attachment; filename=abc.jpg"
-			if (raw != null) {
-				Log.d("raw=" + raw);
+			debugOutputHeaderFields(connection);
+
+			Integer fileSizeOnServer = null;
+			try {
+				String fileSizeString = connection
+						.getHeaderField("Content-Length");
+				if (fileSizeString != null) {
+					fileSizeOnServer = Integer.parseInt(fileSizeString);
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			String rawContDisp = connection
+					.getHeaderField("Content-Disposition");
+			if (rawContDisp != null) {
+				Log.d("raw=" + rawContDisp);
 				Pattern regex = Pattern.compile("(?<=filename=\").*?(?=\")");
-				Matcher regexMatcher = regex.matcher(raw);
+				Matcher regexMatcher = regex.matcher(rawContDisp);
 				if (regexMatcher.find()) {
 					fallbackFileName = regexMatcher.group();
-				} else if (raw.contains("=")) {
+				} else if (rawContDisp.contains("=")) {
 					fallbackFileName = ""
-							+ raw.subSequence(raw.lastIndexOf("=") + 1,
-									raw.length());
+							+ rawContDisp.subSequence(
+									rawContDisp.lastIndexOf("=") + 1,
+									rawContDisp.length());
 					fallbackFileName = fallbackFileName.trim();
 				}
 
@@ -602,14 +621,31 @@ public class IO extends simpleui.util.IOHelper {
 			File targetFile = new File(targetFolder, fallbackFileName);
 			InputStream input = connection.getInputStream();
 			if (l != null) {
-				long lastModifiedDate = connection.getLastModified();
+				long lastModifiedDate = 0;
+				try {
+					String lmString = connection
+							.getHeaderField("Last-Modified");
+					if (lmString != null) {
+						lastModifiedDate = Long.parseLong(lmString);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				if (lastModifiedDate <= 0) {
-					// debugOutputHeaderFields(connection);
+					Log.d(LOG_TAG, "lastModifiedDate=" + lastModifiedDate
+							+ ", trying to get it from getLastModified()");
+					lastModifiedDate = connection.getLastModified();
+				}
+				if (lastModifiedDate <= 0) {
+					Log.d(LOG_TAG, "lastModifiedDate=" + lastModifiedDate
+							+ ", trying to get it from header field 'Date'");
 					lastModifiedDate = connection.getHeaderFieldDate("Date", 0);
 				}
-				Log.d(LOG_TAG, "lastModifiedDate=" + lastModifiedDate);
-				if (!l.onStart(fallbackFileName, lastModifiedDate)) {
-					return null;
+				// debugOutputHeaderFields(connection);
+				Log.v(LOG_TAG, "final lastModifiedDate=" + lastModifiedDate);
+				if (!l.onStart(fallbackFileName, lastModifiedDate,
+						fileSizeOnServer)) {
+					return null; // abort download
 				}
 			}
 			OutputStream output = new FileOutputStream(targetFile);
@@ -655,10 +691,10 @@ public class IO extends simpleui.util.IOHelper {
 	private static void debugOutputHeaderFields(HttpURLConnection connection) {
 		Map<String, List<String>> f = connection.getHeaderFields();
 		for (Entry<String, List<String>> e : f.entrySet()) {
-			Log.i(LOG_TAG, "header key=" + e.getKey());
+			Log.i(LOG_TAG, "       > header key=" + e.getKey());
 			List<String> values = e.getValue();
 			for (String v : values) {
-				Log.i(LOG_TAG, "     > value=" + v);
+				Log.i(LOG_TAG, "              >> value=" + v);
 			}
 		}
 	}
